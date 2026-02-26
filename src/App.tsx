@@ -15,6 +15,7 @@ import { Startups } from './pages/Startups';
 import { Freelance } from './pages/Freelance';
 import { Talent } from './pages/Talent';
 import { Post } from './pages/Post';
+import { SkillForge } from './pages/SkillForge';
 
 export default function App() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -248,6 +249,9 @@ export default function App() {
           } />
           <Route path="/post" element={
             <Post currentUser={currentUser} />
+          } />
+          <Route path="/skills" element={
+            <SkillForge projects={projects} currentUser={currentUser} />
           } />
         </Routes>
 
