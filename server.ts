@@ -2,10 +2,16 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import Database from "better-sqlite3";
 import path from "path";
+import { fileURLToPath } from "url";
 import { Server } from "socket.io";
 import { createServer } from "http";
+import { GoogleGenAI } from "@google/genai";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const db = new Database("campus_catalyst.db");
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 // Initialize Database
 db.exec(`
@@ -89,6 +95,35 @@ async function startServer() {
     db.prepare(
       "UPDATE users SET bio = ?, skills = ?, portfolio_url = ?, availability = ? WHERE id = ?"
     ).run(bio, JSON.stringify(skills), portfolio_url, availability, req.params.id);
+    res.json({ success: true });
+  });
+
+  app.post("/api/ai-feedback", async (req, res) => {
+    const { title, description } = req.body;
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `Analyze this startup idea for a campus environment. Provide 3 pros, 3 cons, and a "Brutalist Score" from 1-10. 
+        Title: ${title}
+        Description: ${description}
+        Return as JSON: { "pros": [], "cons": [], "score": 0, "summary": "" }`
+      });
+      res.json(JSON.parse(response.text || "{}"));
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "AI Feedback failed" });
+    }
+  });
+
+  app.post("/api/projects/:id/convert", (req, res) => {
+    const { equity_split } = req.body; // Expecting { owner: 60, squad: 40 }
+    db.prepare(
+      "UPDATE projects SET category = 'Startup' WHERE id = ?"
+    ).run(req.params.id);
+    
+    // In a real app, we'd save the equity split to a new table
+    console.log(`Project ${req.params.id} converted with equity:`, equity_split);
+    
     res.json({ success: true });
   });
   app.get("/api/projects", (req, res) => {

@@ -19,10 +19,164 @@ import {
   Megaphone,
   Filter,
   User as UserIcon,
-  Circle
+  Circle,
+  Brain,
+  Calculator,
+  Flame,
+  TrendingUp,
+  Award
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { Project, User } from './types';
+
+// --- Advanced Feature Components ---
+
+const ContributionHeatmap = () => {
+  const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  const weeks = 12;
+  
+  return (
+    <div className="border-2 border-black p-4 bg-white">
+      <h4 className="text-[10px] font-black uppercase mb-3 flex items-center gap-2">
+        <TrendingUp className="w-3 h-3" /> Contribution Heatmap
+      </h4>
+      <div className="flex gap-1">
+        <div className="flex flex-col gap-1 pr-2">
+          {days.map((d, i) => (
+            <span key={i} className="text-[8px] font-bold text-zinc-400 h-2 flex items-center">{d}</span>
+          ))}
+        </div>
+        <div className="grid grid-cols-12 gap-1 flex-1">
+          {Array.from({ length: weeks * 7 }).map((_, i) => {
+            const intensity = Math.random();
+            const color = intensity > 0.8 ? 'bg-emerald-500' : 
+                          intensity > 0.5 ? 'bg-emerald-300' : 
+                          intensity > 0.2 ? 'bg-emerald-100' : 'bg-zinc-100';
+            return (
+              <div 
+                key={i} 
+                className={`w-full aspect-square border border-black/5 ${color} hover:border-black transition-all cursor-crosshair`}
+                title={`Activity: ${Math.floor(intensity * 100)}%`}
+              />
+            );
+          })}
+        </div>
+      </div>
+      <div className="mt-2 flex justify-between items-center">
+        <span className="text-[8px] font-mono text-zinc-400 uppercase">Last 90 Days</span>
+        <div className="flex gap-1 items-center">
+          <span className="text-[8px] font-mono text-zinc-400 uppercase">Less</span>
+          <div className="w-2 h-2 bg-zinc-100 border border-black/5" />
+          <div className="w-2 h-2 bg-emerald-100 border border-black/5" />
+          <div className="w-2 h-2 bg-emerald-300 border border-black/5" />
+          <div className="w-2 h-2 bg-emerald-500 border border-black/5" />
+          <span className="text-[8px] font-mono text-zinc-400 uppercase">More</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const RevenueCalculator = () => {
+  const [revenue, setRevenue] = useState(1000);
+  const [members, setMembers] = useState(3);
+  const [equity, setEquity] = useState(20);
+
+  const perMember = (revenue * (1 - equity/100)) / members;
+
+  return (
+    <div className="border-2 border-black p-4 bg-orange-50">
+      <h4 className="text-[10px] font-black uppercase mb-3 flex items-center gap-2">
+        <Calculator className="w-3 h-3" /> Revenue Split Calc
+      </h4>
+      <div className="space-y-3">
+        <div>
+          <label className="block text-[8px] font-black uppercase mb-1">Monthly Revenue ($)</label>
+          <input 
+            type="number" 
+            value={revenue} 
+            onChange={(e) => setRevenue(Number(e.target.value))}
+            className="w-full border border-black p-1 text-[10px] font-bold focus:outline-none"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="block text-[8px] font-black uppercase mb-1">Team Size</label>
+            <input 
+              type="number" 
+              value={members} 
+              onChange={(e) => setMembers(Number(e.target.value))}
+              className="w-full border border-black p-1 text-[10px] font-bold focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-[8px] font-black uppercase mb-1">Reserve (%)</label>
+            <input 
+              type="number" 
+              value={equity} 
+              onChange={(e) => setEquity(Number(e.target.value))}
+              className="w-full border border-black p-1 text-[10px] font-bold focus:outline-none"
+            />
+          </div>
+        </div>
+        <div className="pt-2 border-t border-black/10">
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] font-bold uppercase">Per Member:</span>
+            <span className="text-sm font-black text-orange-600">${perMember.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SquadMatch = ({ project, users, onlineUserIds }: { project: Project, users: User[], onlineUserIds: number[] }) => {
+  const matches = useMemo(() => {
+    return users
+      .filter(u => u.id !== project.owner_id)
+      .map(u => {
+        const matchingSkills = u.skills.filter(s => 
+          project.tags.some(t => t.toLowerCase().includes(s.toLowerCase()))
+        );
+        return { user: u, score: matchingSkills.length, skills: matchingSkills };
+      })
+      .filter(m => m.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 2);
+  }, [project, users]);
+
+  if (matches.length === 0) return null;
+
+  return (
+    <div className="mt-4 p-3 bg-zinc-900 text-white border-2 border-black">
+      <div className="flex items-center gap-2 mb-3">
+        <Flame className="w-3 h-3 text-orange-500 fill-orange-500" />
+        <span className="text-[10px] font-black uppercase tracking-wider">Squad Auto-Match</span>
+      </div>
+      <div className="space-y-2">
+        {matches.map(m => (
+          <div key={m.user.id} className="flex items-center justify-between group cursor-pointer">
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <img src={m.user.avatar} className="w-6 h-6 border border-white/20" alt="" />
+                {onlineUserIds.includes(m.user.id) && (
+                  <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                )}
+              </div>
+              <div>
+                <p className="text-[10px] font-bold leading-none">{m.user.name}</p>
+                <p className="text-[8px] text-zinc-400 uppercase">{m.skills.join(', ')}</p>
+              </div>
+            </div>
+            <button className="text-[8px] font-black uppercase border border-white/20 px-2 py-1 hover:bg-white hover:text-black transition-colors">
+              Invite
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 // --- Components ---
 
@@ -142,7 +296,16 @@ const Navbar = ({ currentUser, onEditProfile }: { currentUser: User | null, onEd
   </nav>
 );
 
-const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
+const ProjectCard: React.FC<{ 
+  project: Project, 
+  users: User[], 
+  onlineUserIds: number[],
+  onConvert: (id: number, equity: any) => void,
+  onFeedback: (p: Project) => void
+}> = ({ project, users, onlineUserIds, onConvert, onFeedback }) => {
+  const [isConverting, setIsConverting] = useState(false);
+  const [equity, setEquity] = useState({ owner: 70, squad: 30 });
+
   const categoryColors = {
     Startup: 'bg-emerald-400',
     Collaboration: 'bg-blue-400',
@@ -155,8 +318,56 @@ const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="group border-2 border-black bg-white p-6 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all"
+      className="group border-2 border-black bg-white p-6 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all flex flex-col relative"
     >
+      <AnimatePresence>
+        {isConverting && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 z-10 bg-white p-6 flex flex-col justify-center border-2 border-black"
+          >
+            <h4 className="text-sm font-black uppercase mb-4">Equity Split Logic</h4>
+            <div className="space-y-4 mb-6">
+              <div>
+                <div className="flex justify-between text-[10px] font-black uppercase mb-1">
+                  <span>Founder</span>
+                  <span>{equity.owner}%</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="0" max="100" 
+                  value={equity.owner} 
+                  onChange={(e) => setEquity({ owner: Number(e.target.value), squad: 100 - Number(e.target.value) })}
+                  className="w-full accent-black"
+                />
+              </div>
+              <div className="flex justify-between text-[10px] font-black uppercase">
+                <span>Squad Pool</span>
+                <span>{equity.squad}%</span>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => {
+                  onConvert(project.id, equity);
+                  setIsConverting(false);
+                }}
+                className="flex-1 bg-black text-white py-2 text-[10px] font-black uppercase"
+              >
+                Confirm
+              </button>
+              <button 
+                onClick={() => setIsConverting(false)}
+                className="flex-1 border border-black py-2 text-[10px] font-black uppercase"
+              >
+                Cancel
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex justify-between items-start mb-4">
         <span className={`text-[10px] font-black uppercase px-2 py-1 border border-black ${categoryColors[project.category]}`}>
           {project.category}
@@ -171,12 +382,32 @@ const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
       <p className="text-sm text-zinc-600 mb-4 line-clamp-2">
         {project.description}
       </p>
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-4">
         {project.tags.map(tag => (
           <span key={tag} className="text-[10px] font-bold uppercase text-zinc-400">#{tag}</span>
         ))}
       </div>
-      <div className="flex items-center justify-between pt-4 border-t border-zinc-100">
+
+      <div className="flex gap-2 mb-6">
+        <button 
+          onClick={() => onFeedback(project)}
+          className="flex-1 border border-black p-2 text-[10px] font-black uppercase flex items-center justify-center gap-2 hover:bg-zinc-50"
+        >
+          <Brain className="w-3 h-3" /> AI Feedback
+        </button>
+        {project.category !== 'Startup' && (
+          <button 
+            onClick={() => setIsConverting(true)}
+            className="flex-1 bg-black text-white p-2 text-[10px] font-black uppercase flex items-center justify-center gap-2 hover:bg-zinc-800"
+          >
+            <Rocket className="w-3 h-3" /> Convert to Startup
+          </button>
+        )}
+      </div>
+
+      <SquadMatch project={project} users={users} onlineUserIds={onlineUserIds} />
+
+      <div className="flex items-center justify-between pt-4 mt-auto border-t border-zinc-100">
         <div className="flex items-center gap-2">
           <img src={project.owner_avatar} className="w-6 h-6 rounded-full border border-black" alt="" />
           <span className="text-xs font-bold">{project.owner_name}</span>
@@ -247,6 +478,10 @@ const Sidebar = ({ users, onlineUserIds }: { users: User[], onlineUserIds: numbe
       </div>
     </div>
 
+    <ContributionHeatmap />
+    
+    <RevenueCalculator />
+
     <div className="border-2 border-black p-6 bg-white">
       <div className="flex items-center justify-between mb-4">
         <h4 className="font-black uppercase text-sm">Active Talent</h4>
@@ -279,6 +514,9 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  
+  const [aiFeedback, setAiFeedback] = useState<any>(null);
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
   useEffect(() => {
     // Initial Data Fetch
@@ -290,31 +528,22 @@ export default function App() {
       setProjects(projectsData);
       setUsers(usersData);
       setOnlineUserIds(onlineData);
-      // For demo purposes, set the first user as current user
       setCurrentUser(usersData[0]);
       setLoading(false);
     });
 
-    // Socket Setup
     const newSocket = io();
     setSocket(newSocket);
-
     newSocket.on('presence_update', (ids: number[]) => {
       setOnlineUserIds(ids);
     });
-
-    return () => {
-      newSocket.close();
-    };
+    return () => { newSocket.close(); };
   }, []);
 
-  // Handle Presence
   useEffect(() => {
     if (socket && currentUser) {
       socket.emit('join', currentUser.id);
-      return () => {
-        socket.emit('leave', currentUser.id);
-      };
+      return () => { socket.emit('leave', currentUser.id); };
     }
   }, [socket, currentUser]);
 
@@ -330,23 +559,47 @@ export default function App() {
 
   const handleSaveProfile = async (updated: Partial<User>) => {
     if (!currentUser) return;
-    
     try {
       const res = await fetch(`/api/users/${currentUser.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updated)
       });
-      
       if (res.ok) {
         const newUserData = { ...currentUser, ...updated } as User;
         setCurrentUser(newUserData);
         setUsers(prev => prev.map(u => u.id === currentUser.id ? newUserData : u));
         setIsProfileModalOpen(false);
       }
-    } catch (err) {
-      console.error("Failed to save profile", err);
-    }
+    } catch (err) { console.error(err); }
+  };
+
+  const handleConvert = async (id: number, equity: any) => {
+    try {
+      const res = await fetch(`/api/projects/${id}/convert`, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ equity_split: equity })
+      });
+      if (res.ok) {
+        setProjects(prev => prev.map(p => p.id === id ? { ...p, category: 'Startup' } as Project : p));
+      }
+    } catch (err) { console.error(err); }
+  };
+
+  const handleAiFeedback = async (project: Project) => {
+    setIsAiLoading(true);
+    setAiFeedback(null);
+    try {
+      const res = await fetch('/api/ai-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: project.title, description: project.description })
+      });
+      const data = await res.json();
+      setAiFeedback(data);
+    } catch (err) { console.error(err); }
+    setIsAiLoading(false);
   };
 
   return (
@@ -360,6 +613,76 @@ export default function App() {
             onClose={() => setIsProfileModalOpen(false)} 
             onSave={handleSaveProfile} 
           />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {(isAiLoading || aiFeedback) && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <motion.div 
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="bg-zinc-900 text-white border-4 border-white p-8 max-w-2xl w-full shadow-[20px_20px_0px_0px_rgba(255,255,255,0.2)]"
+            >
+              {isAiLoading ? (
+                <div className="py-12 text-center">
+                  <Brain className="w-12 h-12 animate-pulse mx-auto mb-4 text-emerald-400" />
+                  <h3 className="text-xl font-black uppercase tracking-widest">Gemini is analyzing...</h3>
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-between items-start mb-8">
+                    <div>
+                      <h3 className="text-3xl font-black uppercase tracking-tighter mb-2">AI Idea Audit</h3>
+                      <p className="text-zinc-400 text-xs font-bold uppercase">Powered by Gemini 3 Flash</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-5xl font-black text-emerald-400">{aiFeedback.score}/10</div>
+                      <div className="text-[10px] font-black uppercase">Brutalist Score</div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div>
+                      <h4 className="text-xs font-black uppercase mb-4 text-emerald-400 flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4" /> The Pros
+                      </h4>
+                      <ul className="space-y-2">
+                        {aiFeedback.pros.map((p: string, i: number) => (
+                          <li key={i} className="text-xs font-bold flex gap-2">
+                            <span className="text-emerald-400">+</span> {p}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black uppercase mb-4 text-orange-400 flex items-center gap-2">
+                        <Filter className="w-4 h-4" /> The Cons
+                      </h4>
+                      <ul className="space-y-2">
+                        {aiFeedback.cons.map((c: string, i: number) => (
+                          <li key={i} className="text-xs font-bold flex gap-2">
+                            <span className="text-orange-400">-</span> {c}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-white/5 border border-white/10 mb-8">
+                    <p className="text-sm font-medium italic text-zinc-300">"{aiFeedback.summary}"</p>
+                  </div>
+
+                  <button 
+                    onClick={() => setAiFeedback(null)}
+                    className="w-full bg-white text-black py-4 text-xs font-black uppercase hover:bg-zinc-200 transition-colors"
+                  >
+                    Dismiss Audit
+                  </button>
+                </>
+              )}
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
       
@@ -421,7 +744,14 @@ export default function App() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <AnimatePresence mode="popLayout">
                   {filteredProjects.map(project => (
-                    <ProjectCard key={project.id} project={project} />
+                    <ProjectCard 
+                      key={project.id} 
+                      project={project} 
+                      users={users}
+                      onlineUserIds={onlineUserIds}
+                      onConvert={handleConvert}
+                      onFeedback={handleAiFeedback}
+                    />
                   ))}
                 </AnimatePresence>
                 {filteredProjects.length === 0 && (
