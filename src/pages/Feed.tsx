@@ -30,24 +30,18 @@ export const Feed: React.FC<FeedProps> = ({ projects, users, onlineUserIds, load
 
   return (
     <>
-      <header className="bg-white border-b-4 border-black py-20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-yellow/10 rounded-full -mr-32 -mt-32 blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-brand-cyan/10 rounded-full -ml-24 -mb-24 blur-3xl" />
-        
-        <div className="max-w-7xl mx-auto px-4 relative">
-          <div className="max-w-4xl">
+      <header className="bg-white border-b-2 border-black py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="max-w-3xl">
             <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-7xl md:text-9xl font-black uppercase leading-[0.8] tracking-tighter mb-8"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter mb-6"
             >
-              Build the <span className="text-brand-pink italic">Future</span> <br />
-              Inside <span className="relative inline-block">
-                Campus
-                <span className="absolute bottom-2 left-0 w-full h-4 bg-brand-yellow -z-10 rotate-[-1deg]" />
-              </span>.
+              Build the <span className="text-fuchsia-500">Future</span> <br />
+              Inside <span className="underline decoration-8 decoration-yellow-300 underline-offset-8">Campus</span>.
             </motion.h1>
-            <p className="text-xl font-black text-zinc-800 max-w-2xl uppercase tracking-tight">
+            <p className="text-lg font-bold text-zinc-600 max-w-xl">
               The ultimate platform for student entrepreneurs, freelancers, and creators to find their next big collaboration.
             </p>
           </div>
@@ -58,23 +52,16 @@ export const Feed: React.FC<FeedProps> = ({ projects, users, onlineUserIds, load
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           <div className="lg:col-span-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
-              <div className="flex flex-wrap gap-3">
-                {[
-                  { name: 'All', color: 'bg-brand-yellow' },
-                  { name: 'Startup', color: 'bg-brand-green' },
-                  { name: 'Collaboration', color: 'bg-brand-cyan' },
-                  { name: 'Freelance', color: 'bg-brand-pink' }
-                ].map(cat => (
+              <div className="flex flex-wrap gap-2">
+                {['All', 'Startup', 'Collaboration', 'Freelance'].map(cat => (
                   <button
-                    key={cat.name}
-                    onClick={() => setFilter(cat.name)}
-                    className={`px-6 py-3 text-xs font-black uppercase border-2 border-black transition-all ${
-                      filter === cat.name 
-                        ? `${cat.color} translate-x-1 translate-y-1 shadow-none` 
-                        : `bg-white hover:${cat.color} shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`
+                    key={cat}
+                    onClick={() => setFilter(cat)}
+                    className={`px-4 py-2 text-xs font-black uppercase border-2 border-black transition-all ${
+                      filter === cat ? 'bg-black text-white translate-x-1 translate-y-1 shadow-none' : 'bg-white hover:bg-zinc-50 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
                     }`}
                   >
-                    {cat.name}
+                    {cat}
                   </button>
                 ))}
               </div>

@@ -36,7 +36,7 @@ export const Sidebar = ({ users, onlineUserIds }: { users: User[], onlineUserIds
       <div className="flex items-center justify-between mb-4">
         <h4 className="font-black uppercase text-sm">Active Talent</h4>
         <div className="flex items-center gap-1">
-          <Circle className="w-2 h-2 fill-emerald-500 text-emerald-500" />
+          <Circle className="w-2 h-2 fill-fuchsia-500 text-fuchsia-500" />
           <span className="text-[10px] font-bold uppercase">{onlineUserIds.length} Online</span>
         </div>
       </div>

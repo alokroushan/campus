@@ -24,7 +24,7 @@ export const Navbar = ({ currentUser, onEditProfile }: { currentUser: User | nul
           <div className="flex items-center gap-3 cursor-pointer group" onClick={onEditProfile}>
             <div className="text-right hidden sm:block">
               <p className="text-xs font-black leading-none group-hover:underline">{currentUser.name}</p>
-              <p className="text-[10px] font-bold text-emerald-500 uppercase">{currentUser.availability}</p>
+              <p className="text-[10px] font-bold text-fuchsia-500 uppercase">{currentUser.availability}</p>
             </div>
             <img src={currentUser.avatar} className="w-8 h-8 border-2 border-black rounded-full group-hover:scale-110 transition-transform" alt="" />
           </div>

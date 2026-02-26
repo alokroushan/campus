@@ -149,7 +149,7 @@ export default function App() {
               >
                 {isAiLoading ? (
                   <div className="py-12 text-center">
-                    <Brain className="w-12 h-12 animate-pulse mx-auto mb-4 text-emerald-400" />
+                    <Brain className="w-12 h-12 animate-pulse mx-auto mb-4 text-fuchsia-400" />
                     <h3 className="text-xl font-black uppercase tracking-widest">Gemini is analyzing...</h3>
                   </div>
                 ) : (
@@ -160,20 +160,20 @@ export default function App() {
                         <p className="text-zinc-400 text-xs font-bold uppercase">Powered by Gemini 3 Flash</p>
                       </div>
                       <div className="text-right">
-                        <div className="text-5xl font-black text-emerald-400">{aiFeedback?.score || 0}/10</div>
+                        <div className="text-5xl font-black text-fuchsia-400">{aiFeedback?.score || 0}/10</div>
                         <div className="text-[10px] font-black uppercase">Brutalist Score</div>
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                       <div>
-                        <h4 className="text-xs font-black uppercase mb-4 text-emerald-400 flex items-center gap-2">
+                        <h4 className="text-xs font-black uppercase mb-4 text-fuchsia-400 flex items-center gap-2">
                           <TrendingUp className="w-4 h-4" /> The Pros
                         </h4>
                         <ul className="space-y-2">
                           {(aiFeedback?.pros || []).map((p: string, i: number) => (
                             <li key={i} className="text-xs font-bold flex gap-2">
-                              <span className="text-emerald-400">+</span> {p}
+                              <span className="text-fuchsia-400">+</span> {p}
                             </li>
                           ))}
                         </ul>
@@ -268,9 +268,9 @@ export default function App() {
                 Empowering the next generation of founders and creators right where they are.
               </p>
               <div className="flex gap-4">
-                <Github className="w-5 h-5 cursor-pointer hover:text-emerald-500" />
-                <Twitter className="w-5 h-5 cursor-pointer hover:text-emerald-500" />
-                <Mail className="w-5 h-5 cursor-pointer hover:text-emerald-500" />
+                <Github className="w-5 h-5 cursor-pointer hover:text-fuchsia-500" />
+                <Twitter className="w-5 h-5 cursor-pointer hover:text-fuchsia-500" />
+                <Mail className="w-5 h-5 cursor-pointer hover:text-fuchsia-500" />
               </div>
             </div>
             <div>
@@ -295,7 +295,7 @@ export default function App() {
           <div className="max-w-7xl mx-auto px-4 mt-12 pt-12 border-t border-zinc-100 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-[10px] font-mono text-zinc-400 uppercase">© 2024 Campus Catalyst. Built for the bold.</p>
             <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-400 uppercase">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <div className="w-2 h-2 bg-fuchsia-500 rounded-full animate-pulse" />
               System Operational
             </div>
           </div>

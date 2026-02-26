@@ -109,7 +109,7 @@ export const SkillForge: React.FC<SkillForgeProps> = ({ projects, currentUser })
     <main className="max-w-7xl mx-auto px-4 py-12">
       <header className="mb-12">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-emerald-500 flex items-center justify-center rounded-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black">
+          <div className="w-10 h-10 bg-fuchsia-500 flex items-center justify-center rounded-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black">
             <Brain className="text-white w-6 h-6" />
           </div>
           <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Skill Forge</h1>
@@ -138,7 +138,7 @@ export const SkillForge: React.FC<SkillForgeProps> = ({ projects, currentUser })
               <button 
                 onClick={generateRoadmap}
                 disabled={isLoading || !skillInput.trim()}
-                className="bg-black text-white px-8 py-4 text-sm font-black uppercase hover:bg-emerald-500 transition-colors disabled:opacity-50 disabled:hover:bg-black flex items-center justify-center gap-2"
+                className="bg-black text-white px-8 py-4 text-sm font-black uppercase hover:bg-fuchsia-500 transition-colors disabled:opacity-50 disabled:hover:bg-black flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -162,7 +162,7 @@ export const SkillForge: React.FC<SkillForgeProps> = ({ projects, currentUser })
                   <div className="bg-yellow-300 border-2 border-black px-4 py-1 text-[10px] font-black uppercase">
                     Difficulty: {roadmap.difficulty}
                   </div>
-                  <div className="bg-emerald-400 border-2 border-black px-4 py-1 text-[10px] font-black uppercase">
+                  <div className="bg-fuchsia-400 border-2 border-black px-4 py-1 text-[10px] font-black uppercase">
                     Est. Time: {roadmap.estimatedTime}
                   </div>
                 </div>
@@ -176,10 +176,10 @@ export const SkillForge: React.FC<SkillForgeProps> = ({ projects, currentUser })
                       transition={{ delay: idx * 0.1 }}
                       className="group relative pl-12 pb-8 border-l-4 border-black last:pb-0"
                     >
-                      <div className="absolute left-[-16px] top-0 w-8 h-8 bg-white border-4 border-black flex items-center justify-center font-black text-sm group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                      <div className="absolute left-[-16px] top-0 w-8 h-8 bg-white border-4 border-black flex items-center justify-center font-black text-sm group-hover:bg-fuchsia-500 group-hover:text-white transition-colors">
                         {idx + 1}
                       </div>
-                      <h3 className="text-xl font-black uppercase mb-2 group-hover:text-emerald-600 transition-colors">{step.title}</h3>
+                      <h3 className="text-xl font-black uppercase mb-2 group-hover:text-fuchsia-600 transition-colors">{step.title}</h3>
                       <p className="text-sm font-bold text-zinc-600 mb-4 leading-relaxed">{step.description}</p>
                       <div className="flex flex-wrap gap-2">
                         {step.resources.map((res, rIdx) => (
@@ -213,7 +213,7 @@ export const SkillForge: React.FC<SkillForgeProps> = ({ projects, currentUser })
                       rel="noopener noreferrer"
                       className="block p-4 border-2 border-black hover:bg-zinc-50 transition-colors"
                     >
-                      <h4 className="font-black text-sm uppercase mb-1 group-hover:text-emerald-600">{roadmap.youtubePlaylist.title}</h4>
+                      <h4 className="font-black text-sm uppercase mb-1 group-hover:text-fuchsia-600">{roadmap.youtubePlaylist.title}</h4>
                       <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase">
                         View on YouTube <ArrowRight className="w-3 h-3" />
                       </div>
@@ -229,7 +229,7 @@ export const SkillForge: React.FC<SkillForgeProps> = ({ projects, currentUser })
                       rel="noopener noreferrer"
                       className="block p-4 border-2 border-black hover:bg-zinc-50 transition-colors"
                     >
-                      <h4 className="font-black text-sm uppercase mb-1 group-hover:text-emerald-600">{roadmap.nptelCourse.title}</h4>
+                      <h4 className="font-black text-sm uppercase mb-1 group-hover:text-fuchsia-600">{roadmap.nptelCourse.title}</h4>
                       <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase">
                         View on NPTEL <ArrowRight className="w-3 h-3" />
                       </div>
@@ -243,7 +243,7 @@ export const SkillForge: React.FC<SkillForgeProps> = ({ projects, currentUser })
           {roadmap && (
             <section className="bg-black text-white p-8 border-4 border-black shadow-[8px_8px_0px_0px_rgba(16,185,129,1)]">
               <h2 className="text-lg font-black uppercase mb-6 flex items-center gap-2">
-                <Target className="w-5 h-5 text-emerald-400" /> Practice Grounds
+                <Target className="w-5 h-5 text-fuchsia-400" /> Practice Grounds
               </h2>
               <p className="text-xs font-bold text-zinc-400 mb-6 uppercase tracking-widest">
                 Real campus projects needing {roadmap.skill}
@@ -251,12 +251,12 @@ export const SkillForge: React.FC<SkillForgeProps> = ({ projects, currentUser })
               
               <div className="space-y-4">
                 {relevantProjects.length > 0 ? relevantProjects.map(project => (
-                  <div key={project.id} className="p-4 border border-white/20 hover:border-emerald-400 transition-colors group cursor-pointer">
-                    <h4 className="font-black text-sm uppercase mb-1 group-hover:text-emerald-400">{project.title}</h4>
+                  <div key={project.id} className="p-4 border border-white/20 hover:border-fuchsia-400 transition-colors group cursor-pointer">
+                    <h4 className="font-black text-sm uppercase mb-1 group-hover:text-fuchsia-400">{project.title}</h4>
                     <p className="text-[10px] font-bold text-zinc-500 line-clamp-2 mb-3">{project.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-[9px] font-black uppercase px-2 py-0.5 bg-white/10">{project.category}</span>
-                      <ArrowRight className="w-3 h-3 text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <ArrowRight className="w-3 h-3 text-fuchsia-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                   </div>
                 )) : (
@@ -280,7 +280,7 @@ export const SkillForge: React.FC<SkillForgeProps> = ({ projects, currentUser })
                 "Teach what you learn to solidify knowledge."
               ].map((tip, i) => (
                 <li key={i} className="flex gap-3 text-xs font-bold">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-fuchsia-500 shrink-0" />
                   {tip}
                 </li>
               ))}

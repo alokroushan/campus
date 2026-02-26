@@ -65,7 +65,7 @@ export const Post = ({ currentUser }: { currentUser: User | null }) => {
             <label className="block text-xs font-black uppercase mb-2">Category</label>
             <div className="grid grid-cols-3 gap-4">
               {[
-                { id: 'Startup', icon: Rocket, color: 'bg-emerald-400' },
+                { id: 'Startup', icon: Rocket, color: 'bg-fuchsia-400' },
                 { id: 'Collaboration', icon: Users, color: 'bg-blue-400' },
                 { id: 'Freelance', icon: Briefcase, color: 'bg-orange-400' }
               ].map(cat => (
