@@ -15,6 +15,8 @@ interface Roadmap {
   difficulty: string;
   estimatedTime: string;
   steps: RoadmapStep[];
+  youtubePlaylist?: { title: string; url: string };
+  nptelCourse?: { title: string; url: string };
 }
 
 interface SkillForgeProps {
@@ -42,6 +44,7 @@ export const SkillForge: React.FC<SkillForgeProps> = ({ projects, currentUser })
         contents: `Create a professional learning roadmap for the skill: "${skillInput}". 
         Focus on a student in a campus environment. 
         Provide 5 clear steps with descriptions and suggested resource types.
+        Also suggest one specific YouTube lecture playlist title and one NPTEL course title that would be highly relevant.
         Return as JSON.`,
         config: {
           responseMimeType: "application/json",
@@ -51,6 +54,22 @@ export const SkillForge: React.FC<SkillForgeProps> = ({ projects, currentUser })
               skill: { type: Type.STRING },
               difficulty: { type: Type.STRING },
               estimatedTime: { type: Type.STRING },
+              youtubePlaylist: {
+                type: Type.OBJECT,
+                properties: {
+                  title: { type: Type.STRING },
+                  url: { type: Type.STRING, description: "A search URL for this playlist on YouTube" }
+                },
+                required: ["title", "url"]
+              },
+              nptelCourse: {
+                type: Type.OBJECT,
+                properties: {
+                  title: { type: Type.STRING },
+                  url: { type: Type.STRING, description: "A search URL for this course on NPTEL or Google" }
+                },
+                required: ["title", "url"]
+              },
               steps: {
                 type: Type.ARRAY,
                 items: {
@@ -64,7 +83,7 @@ export const SkillForge: React.FC<SkillForgeProps> = ({ projects, currentUser })
                 }
               }
             },
-            required: ["skill", "difficulty", "estimatedTime", "steps"]
+            required: ["skill", "difficulty", "estimatedTime", "steps", "youtubePlaylist", "nptelCourse"]
           }
         }
       });
@@ -179,6 +198,48 @@ export const SkillForge: React.FC<SkillForgeProps> = ({ projects, currentUser })
 
         {/* Right Column: Recommended Projects & Stats */}
         <div className="lg:col-span-4 space-y-12">
+          {roadmap && (
+            <section className="bg-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_rgba(254,240,138,1)]">
+              <h2 className="text-lg font-black uppercase mb-6 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-yellow-600" /> Recommended Courses
+              </h2>
+              <div className="space-y-6">
+                {roadmap.youtubePlaylist && (
+                  <div className="group">
+                    <p className="text-[10px] font-black uppercase text-zinc-400 mb-2">YouTube Playlist</p>
+                    <a 
+                      href={roadmap.youtubePlaylist.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block p-4 border-2 border-black hover:bg-zinc-50 transition-colors"
+                    >
+                      <h4 className="font-black text-sm uppercase mb-1 group-hover:text-emerald-600">{roadmap.youtubePlaylist.title}</h4>
+                      <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase">
+                        View on YouTube <ArrowRight className="w-3 h-3" />
+                      </div>
+                    </a>
+                  </div>
+                )}
+                {roadmap.nptelCourse && (
+                  <div className="group">
+                    <p className="text-[10px] font-black uppercase text-zinc-400 mb-2">NPTEL Course</p>
+                    <a 
+                      href={roadmap.nptelCourse.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block p-4 border-2 border-black hover:bg-zinc-50 transition-colors"
+                    >
+                      <h4 className="font-black text-sm uppercase mb-1 group-hover:text-emerald-600">{roadmap.nptelCourse.title}</h4>
+                      <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase">
+                        View on NPTEL <ArrowRight className="w-3 h-3" />
+                      </div>
+                    </a>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
           {roadmap && (
             <section className="bg-black text-white p-8 border-4 border-black shadow-[8px_8px_0px_0px_rgba(16,185,129,1)]">
               <h2 className="text-lg font-black uppercase mb-6 flex items-center gap-2">
