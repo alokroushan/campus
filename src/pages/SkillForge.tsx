@@ -37,8 +37,32 @@ export const SkillForge: React.FC<SkillForgeProps> = ({ projects, currentUser })
     setError(null);
     setRoadmap(null);
 
+    // Mock data for hackathon demo if API key is missing
+    const mockRoadmap: Roadmap = {
+      skill: skillInput,
+      difficulty: "Intermediate",
+      estimatedTime: "4-6 Weeks",
+      youtubePlaylist: { title: `Best of ${skillInput} Tutorials`, url: `https://www.youtube.com/results?search_query=${skillInput}+playlist` },
+      nptelCourse: { title: `Introduction to ${skillInput}`, url: `https://www.google.com/search?q=nptel+${skillInput}` },
+      steps: [
+        { title: "Foundations & Setup", description: "Learn the basic syntax and environment setup required for professional development.", resources: ["Official Docs", "Getting Started Guide"] },
+        { title: "Core Concepts", description: "Master the fundamental building blocks and architectural patterns.", resources: ["Video Series", "Interactive Labs"] },
+        { title: "Intermediate Projects", description: "Build 2-3 small scale applications to solidify your understanding.", resources: ["Project Templates", "GitHub Repos"] },
+        { title: "Advanced Optimization", description: "Focus on performance, security, and best practices for production.", resources: ["Tech Blogs", "Case Studies"] },
+        { title: "Portfolio Integration", description: "Deploy your work and document the process for your professional portfolio.", resources: ["Vercel", "Portfolio Site"] }
+      ]
+    };
+
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        // Simulate loading for 1.5s then show mock data
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        setRoadmap(mockRoadmap);
+        return;
+      }
+
+      const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: `Create a professional learning roadmap for the skill: "${skillInput}". 
@@ -116,6 +140,7 @@ export const SkillForge: React.FC<SkillForgeProps> = ({ projects, currentUser })
         </div>
         <p className="text-lg font-bold text-zinc-600 max-w-2xl">
           Level up your campus career. Use AI to generate custom learning roadmaps and find projects to practice your new skills.
+          {!process.env.GEMINI_API_KEY && <span className="block mt-2 text-fuchsia-500 text-xs uppercase">[ Demo Mode Active ]</span>}
         </p>
       </header>
 

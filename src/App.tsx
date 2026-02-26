@@ -91,8 +91,25 @@ export default function App() {
   const handleAiFeedback = async (project: Project) => {
     setIsAiLoading(true);
     setAiFeedback(null);
+    
+    // Mock data for hackathon demo if API key is missing
+    const mockFeedback: AiFeedback = {
+      pros: ["High student engagement potential", "Scalable campus infrastructure", "Low initial overhead"],
+      cons: ["Seasonal user retention", "Dependency on university policy", "Initial trust barrier"],
+      score: 8,
+      summary: "A solid campus-focused initiative. Focus on building a strong initial user base within a single department before scaling university-wide."
+    };
+
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        // Simulate loading for 1.5s then show mock data
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        setAiFeedback(mockFeedback);
+        return;
+      }
+
+      const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: `Analyze this startup idea for a campus environment. Provide 3 pros, 3 cons, and a "Brutalist Score" from 1-10. 
@@ -157,7 +174,9 @@ export default function App() {
                     <div className="flex justify-between items-start mb-8">
                       <div>
                         <h3 className="text-3xl font-black uppercase tracking-tighter mb-2">AI Idea Audit</h3>
-                        <p className="text-zinc-400 text-xs font-bold uppercase">Powered by Gemini 3 Flash</p>
+                        <p className="text-zinc-400 text-xs font-bold uppercase">
+                          {process.env.GEMINI_API_KEY ? "Powered by Gemini 3 Flash" : "Demo Mode (Mock Analysis)"}
+                        </p>
                       </div>
                       <div className="text-right">
                         <div className="text-5xl font-black text-fuchsia-400">{aiFeedback?.score || 0}/10</div>
