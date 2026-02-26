@@ -3,8 +3,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { io, Socket } from 'socket.io-client';
 import { Brain, Github, Twitter, Mail, Zap, TrendingUp, Filter } from 'lucide-react';
+import { GoogleGenAI, Type } from "@google/genai";
 
-import { Project, User } from './types';
+import { Project, User, AiFeedback } from './types';
 import { Navbar } from './components/Navbar';
 import { ProfileModal } from './components/ProfileModal';
 
@@ -24,7 +25,7 @@ export default function App() {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   
-  const [aiFeedback, setAiFeedback] = useState<any>(null);
+  const [aiFeedback, setAiFeedback] = useState<AiFeedback | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
 
   useEffect(() => {
@@ -90,15 +91,36 @@ export default function App() {
     setIsAiLoading(true);
     setAiFeedback(null);
     try {
-      const res = await fetch('/api/ai-feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: project.title, description: project.description })
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `Analyze this startup idea for a campus environment. Provide 3 pros, 3 cons, and a "Brutalist Score" from 1-10. 
+        Title: ${project.title}
+        Description: ${project.description}
+        Return as JSON: { "pros": [], "cons": [], "score": 0, "summary": "" }`,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              pros: { type: Type.ARRAY, items: { type: Type.STRING } },
+              cons: { type: Type.ARRAY, items: { type: Type.STRING } },
+              score: { type: Type.NUMBER },
+              summary: { type: Type.STRING }
+            },
+            required: ["pros", "cons", "score", "summary"]
+          }
+        }
       });
-      const data = await res.json();
+      
+      const data = JSON.parse(response.text || "{}") as AiFeedback;
       setAiFeedback(data);
-    } catch (err) { console.error(err); }
-    setIsAiLoading(false);
+    } catch (err) { 
+      console.error(err); 
+      // Fallback or error state
+    } finally {
+      setIsAiLoading(false);
+    }
   };
 
   return (
@@ -137,7 +159,7 @@ export default function App() {
                         <p className="text-zinc-400 text-xs font-bold uppercase">Powered by Gemini 3 Flash</p>
                       </div>
                       <div className="text-right">
-                        <div className="text-5xl font-black text-emerald-400">{aiFeedback.score}/10</div>
+                        <div className="text-5xl font-black text-emerald-400">{aiFeedback?.score || 0}/10</div>
                         <div className="text-[10px] font-black uppercase">Brutalist Score</div>
                       </div>
                     </div>
@@ -148,7 +170,7 @@ export default function App() {
                           <TrendingUp className="w-4 h-4" /> The Pros
                         </h4>
                         <ul className="space-y-2">
-                          {aiFeedback.pros.map((p: string, i: number) => (
+                          {(aiFeedback?.pros || []).map((p: string, i: number) => (
                             <li key={i} className="text-xs font-bold flex gap-2">
                               <span className="text-emerald-400">+</span> {p}
                             </li>
@@ -160,7 +182,7 @@ export default function App() {
                           <Filter className="w-4 h-4" /> The Cons
                         </h4>
                         <ul className="space-y-2">
-                          {aiFeedback.cons.map((c: string, i: number) => (
+                          {(aiFeedback?.cons || []).map((c: string, i: number) => (
                             <li key={i} className="text-xs font-bold flex gap-2">
                               <span className="text-orange-400">-</span> {c}
                             </li>
@@ -170,7 +192,7 @@ export default function App() {
                     </div>
 
                     <div className="p-4 bg-white/5 border border-white/10 mb-8">
-                      <p className="text-sm font-medium italic text-zinc-300">"{aiFeedback.summary}"</p>
+                      <p className="text-sm font-medium italic text-zinc-300">"{aiFeedback?.summary || 'No summary available.'}"</p>
                     </div>
 
                     <button 

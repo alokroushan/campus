@@ -21,3 +21,10 @@ export interface Project {
   tags: string[];
   created_at: string;
 }
+
+export interface AiFeedback {
+  pros: string[];
+  cons: string[];
+  score: number;
+  summary: string;
+}
