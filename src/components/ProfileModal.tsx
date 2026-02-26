@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { User } from '../types';
 
 export const ProfileModal = ({ user, onClose, onSave }: { user: User, onClose: () => void, onSave: (updated: Partial<User>) => void }) => {

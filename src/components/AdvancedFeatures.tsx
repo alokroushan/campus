@@ -1,49 +1,139 @@
-import React, { useState, useMemo } from 'react';
-import { motion } from 'motion/react';
-import { TrendingUp, Calculator, Flame } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { TrendingUp, Calculator, Flame, BarChart3, Brain } from 'lucide-react';
+import * as d3 from 'd3';
 import { Project, User } from '../types';
 
-export const ContributionHeatmap = () => {
-  const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-  const weeks = 12;
-  
+export const PlatformAnalysis = () => {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [analysis, setAnalysis] = useState<string>("Analyzing platform trends...");
+
+  useEffect(() => {
+    if (!svgRef.current) return;
+
+    const data = [
+      { day: 'Mon', value: 30 },
+      { day: 'Tue', value: 45 },
+      { day: 'Wed', value: 35 },
+      { day: 'Thu', value: 60 },
+      { day: 'Fri', value: 85 },
+      { day: 'Sat', value: 50 },
+      { day: 'Sun', value: 75 }
+    ];
+
+    const margin = { top: 10, right: 10, bottom: 20, left: 25 };
+    const width = 280 - margin.left - margin.right;
+    const height = 120 - margin.top - margin.bottom;
+
+    d3.select(svgRef.current).selectAll("*").remove();
+
+    const svg = d3.select(svgRef.current)
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const x = d3.scalePoint()
+      .domain(data.map(d => d.day))
+      .range([0, width]);
+
+    const y = d3.scaleLinear()
+      .domain([0, 100])
+      .range([height, 0]);
+
+    // Add X axis
+    svg.append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(x).tickSize(0).tickPadding(8))
+      .attr("font-family", "inherit")
+      .attr("font-size", "8px")
+      .attr("font-weight", "900")
+      .selectAll("text")
+      .style("text-transform", "uppercase")
+      .style("color", "#71717a");
+
+    // Add Y axis
+    svg.append("g")
+      .call(d3.axisLeft(y).ticks(3).tickSize(0).tickPadding(5))
+      .attr("font-family", "inherit")
+      .attr("font-size", "8px")
+      .attr("font-weight", "900")
+      .selectAll("text")
+      .style("color", "#71717a");
+
+    // Line
+    const line = d3.line<any>()
+      .x(d => x(d.day)!)
+      .y(d => y(d.value)!)
+      .curve(d3.curveMonotoneX);
+
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "#d946ef")
+      .attr("stroke-width", 3)
+      .attr("d", line);
+
+    // Area
+    const area = d3.area<any>()
+      .x(d => x(d.day)!)
+      .y0(height)
+      .y1(d => y(d.value)!)
+      .curve(d3.curveMonotoneX);
+
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "rgba(217, 70, 239, 0.1)")
+      .attr("d", area);
+
+    // Dots
+    svg.selectAll("circle")
+      .data(data)
+      .enter()
+      .append("circle")
+      .attr("cx", d => x(d.day)!)
+      .attr("cy", d => y(d.value)!)
+      .attr("r", 4)
+      .attr("fill", "black")
+      .attr("stroke", "white")
+      .attr("stroke-width", 2);
+
+    // Simulate AI analysis
+    setTimeout(() => {
+      setAnalysis("Platform activity spiked by 24% on Friday. Tech-stack searches are dominating the weekend trend.");
+    }, 1500);
+
+  }, []);
+
   return (
-    <div className="border-2 border-black p-4 bg-white">
-      <h4 className="text-[10px] font-black uppercase mb-3 flex items-center gap-2">
-        <TrendingUp className="w-3 h-3" /> Contribution Heatmap
-      </h4>
-      <div className="flex gap-1">
-        <div className="flex flex-col gap-1 pr-2">
-          {days.map((d, i) => (
-            <span key={i} className="text-[8px] font-bold text-zinc-400 h-2 flex items-center">{d}</span>
-          ))}
-        </div>
-        <div className="grid grid-cols-12 gap-1 flex-1">
-          {Array.from({ length: weeks * 7 }).map((_, i) => {
-            const intensity = Math.random();
-            const color = intensity > 0.8 ? 'bg-emerald-500' : 
-                          intensity > 0.5 ? 'bg-emerald-300' : 
-                          intensity > 0.2 ? 'bg-emerald-100' : 'bg-zinc-100';
-            return (
-              <div 
-                key={i} 
-                className={`w-full aspect-square border border-black/5 ${color} hover:border-black transition-all cursor-crosshair`}
-                title={`Activity: ${Math.floor(intensity * 100)}%`}
-              />
-            );
-          })}
-        </div>
+    <div className="border-4 border-black p-6 bg-white shadow-[12px_12px_0_0_rgba(0,0,0,1)]">
+      <div className="flex items-center justify-between mb-6">
+        <h4 className="text-xs font-black uppercase flex items-center gap-2 tracking-tighter">
+          <BarChart3 className="w-4 h-4" /> PLATFORM ANALYSIS
+        </h4>
+        <span className="text-[8px] font-black bg-fuchsia-500 text-white px-2 py-0.5 uppercase">Live</span>
       </div>
-      <div className="mt-2 flex justify-between items-center">
-        <span className="text-[8px] font-mono text-zinc-400 uppercase">Last 90 Days</span>
-        <div className="flex gap-1 items-center">
-          <span className="text-[8px] font-mono text-zinc-400 uppercase">Less</span>
-          <div className="w-2 h-2 bg-zinc-100 border border-black/5" />
-          <div className="w-2 h-2 bg-emerald-100 border border-black/5" />
-          <div className="w-2 h-2 bg-emerald-300 border border-black/5" />
-          <div className="w-2 h-2 bg-emerald-500 border border-black/5" />
-          <span className="text-[8px] font-mono text-zinc-400 uppercase">More</span>
+      
+      <div className="mb-6 overflow-hidden">
+        <svg ref={svgRef} className="mx-auto" />
+      </div>
+
+      <div className="bg-zinc-900 p-4 border-2 border-black">
+        <div className="flex items-center gap-2 mb-2">
+          <Brain className="w-3 h-3 text-fuchsia-400" />
+          <span className="text-[10px] font-black text-white uppercase tracking-widest">AI Insights</span>
         </div>
+        <p className="text-[10px] font-bold text-zinc-400 leading-relaxed italic">
+          "{analysis}"
+        </p>
+      </div>
+
+      <div className="mt-4 flex justify-between items-center pt-4 border-t-2 border-zinc-100">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="w-3 h-3 text-emerald-500" />
+          <span className="text-[10px] font-black text-emerald-500 uppercase">+12.5% Growth</span>
+        </div>
+        <span className="text-[8px] font-black text-zinc-400 uppercase">Updated 2m ago</span>
       </div>
     </div>
   );

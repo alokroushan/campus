@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Rocket, Brain, ChevronRight } from 'lucide-react';
 import { Project, User } from '../types';
 import { SquadMatch } from './AdvancedFeatures';

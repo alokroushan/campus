@@ -2,10 +2,12 @@ import React from 'react';
 import { Sparkles, Code, Palette, Megaphone, Globe, Circle } from 'lucide-react';
 import { User } from '../types';
 import { TalentCard } from './TalentCard';
-import { ContributionHeatmap, RevenueCalculator } from './AdvancedFeatures';
+import { RevenueCalculator, PlatformAnalysis } from './AdvancedFeatures';
 
 export const Sidebar = ({ users, onlineUserIds }: { users: User[], onlineUserIds: number[] }) => (
   <div className="space-y-8">
+    <PlatformAnalysis />
+    
     <div className="border-2 border-black p-6 bg-yellow-300">
       <h4 className="font-black uppercase text-sm mb-4 flex items-center gap-2">
         <Sparkles className="w-4 h-4" /> Trending Skills
@@ -28,8 +30,6 @@ export const Sidebar = ({ users, onlineUserIds }: { users: User[], onlineUserIds
       </div>
     </div>
 
-    <ContributionHeatmap />
-    
     <RevenueCalculator />
 
     <div className="border-2 border-black p-6 bg-white">

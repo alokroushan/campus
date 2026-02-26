@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Search } from 'lucide-react';
 import { Project, User } from '../types';
 import { ProjectCard } from '../components/ProjectCard';

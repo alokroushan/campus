@@ -151,12 +151,16 @@ async function startServer() {
   const userCount = db.prepare("SELECT COUNT(*) as count FROM users").get() as { count: number };
   if (userCount.count === 0) {
     const insertUser = db.prepare("INSERT INTO users (name, email, bio, avatar, skills, portfolio_url, availability) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    insertUser.run("Alex Chen", "alex@campus.edu", "Full-stack dev & UI enthusiast", "https://picsum.photos/seed/alex/100/100", JSON.stringify(["React", "Node.js", "Design"]), "https://github.com/alex", "Open to Startup");
-    insertUser.run("Sarah Miller", "sarah@campus.edu", "Marketing major looking for tech partners", "https://picsum.photos/seed/sarah/100/100", JSON.stringify(["Marketing", "Strategy", "Copywriting"]), "https://sarah.design", "Open to Work");
+    insertUser.run("Nivedita Shikarwar", "nivedita@campus.edu", "Full-stack dev & UI enthusiast", "https://picsum.photos/seed/nivedita/100/100", JSON.stringify(["React", "Node.js", "Design"]), "https://github.com/nivedita", "Open to Startup");
+    insertUser.run("Aashi Bhalla", "aashi@campus.edu", "Marketing major looking for tech partners", "https://picsum.photos/seed/aashi/100/100", JSON.stringify(["Marketing", "Strategy", "Copywriting"]), "https://aashi.design", "Open to Work");
     
     const insertProject = db.prepare("INSERT INTO projects (title, description, category, owner_id, tags) VALUES (?, ?, ?, ?, ?)");
     insertProject.run("EcoTrack App", "Building a smart campus recycling tracker.", "Startup", 1, JSON.stringify(["Sustainability", "Mobile"]));
     insertProject.run("Logo Design for Club", "Need a fresh logo for the Robotics club.", "Freelance", 2, JSON.stringify(["Graphic Design", "Branding"]));
+  } else {
+    // Force update for existing demo data
+    db.prepare("UPDATE users SET name = 'Nivedita Shikarwar' WHERE name = 'Alex Chen'").run();
+    db.prepare("UPDATE users SET name = 'Aashi Bhalla' WHERE name = 'Sarah Miller'").run();
   }
 
   // Vite middleware for development

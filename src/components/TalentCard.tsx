@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { User } from '../types';
 
 export const TalentCard: React.FC<{ user: User, isOnline: boolean }> = ({ user, isOnline }) => (
@@ -8,7 +8,7 @@ export const TalentCard: React.FC<{ user: User, isOnline: boolean }> = ({ user, 
     className="border-2 border-black bg-white p-4 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
   >
     <div className="flex items-start gap-4">
-      <div className="relative">
+      <div className="relative shrink-0">
         <img src={user.avatar} className="w-12 h-12 border-2 border-black rounded-sm" alt="" />
         {isOnline && (
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-fuchsia-500 border-2 border-white rounded-full animate-pulse" />

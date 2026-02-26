@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Sparkles, CheckCircle2, ArrowRight, BookOpen, Target, Zap } from 'lucide-react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { Project, User } from '../types';

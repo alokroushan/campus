@@ -15,12 +15,10 @@ export const Navbar = ({ currentUser, onEditProfile }: { currentUser: User | nul
       <div className="hidden md:flex items-center gap-8 text-sm font-bold uppercase tracking-widest">
         <NavLink to="/" className={({ isActive }) => isActive ? "underline underline-offset-4" : "hover:underline underline-offset-4"}>Feed</NavLink>
         <NavLink to="/startups" className={({ isActive }) => isActive ? "underline underline-offset-4" : "hover:underline underline-offset-4"}>Startups</NavLink>
-        <NavLink to="/freelance" className={({ isActive }) => isActive ? "underline underline-offset-4" : "hover:underline underline-offset-4"}>Freelance</NavLink>
-        <NavLink to="/talent" className={({ isActive }) => isActive ? "underline underline-offset-4" : "hover:underline underline-offset-4"}>Talent</NavLink>
         <NavLink to="/skills" className={({ isActive }) => isActive ? "underline underline-offset-4" : "hover:underline underline-offset-4"}>Skills</NavLink>
       </div>
       <div className="flex items-center gap-4">
-        {currentUser ? (
+        {currentUser && (
           <div className="flex items-center gap-3 cursor-pointer group" onClick={onEditProfile}>
             <div className="text-right hidden sm:block">
               <p className="text-xs font-black leading-none group-hover:underline">{currentUser.name}</p>
@@ -28,10 +26,6 @@ export const Navbar = ({ currentUser, onEditProfile }: { currentUser: User | nul
             </div>
             <img src={currentUser.avatar} className="w-8 h-8 border-2 border-black rounded-full group-hover:scale-110 transition-transform" alt="" />
           </div>
-        ) : (
-          <button className="hidden sm:block text-xs font-bold uppercase border-2 border-black px-4 py-2 hover:bg-black hover:text-white transition-colors">
-            Sign In
-          </button>
         )}
         <Link to="/post" className="bg-black text-white text-xs font-bold uppercase px-4 py-2 hover:bg-zinc-800 transition-colors flex items-center gap-2">
           <Plus className="w-4 h-4" /> Post
