@@ -30,20 +30,93 @@ export default function App() {
   const [isAiLoading, setIsAiLoading] = useState(false);
 
   useEffect(() => {
-    // Initial Data Fetch
-    Promise.all([
-      fetch('/api/projects').then(res => res.json()),
-      fetch('/api/users').then(res => res.json()),
-      fetch('/api/online-users').then(res => res.json())
-    ]).then(([projectsData, usersData, onlineData]) => {
-      setProjects(projectsData);
-      setUsers(usersData);
-      setOnlineUserIds(onlineData);
-      setCurrentUser(usersData[0]);
-      setLoading(false);
-    });
+    // Initial Data Fetch with Mock Fallback for Vercel/Hackathon
+    const fetchInitialData = async () => {
+      try {
+        const [projectsRes, usersRes, onlineRes] = await Promise.all([
+          fetch('/api/projects'),
+          fetch('/api/users'),
+          fetch('/api/online-users')
+        ]);
 
-    const newSocket = io();
+        if (!projectsRes.ok || !usersRes.ok || !onlineRes.ok) {
+          throw new Error('Backend not available');
+        }
+
+        const projectsData = await projectsRes.json();
+        const usersData = await usersRes.json();
+        const onlineData = await onlineRes.json();
+
+        setProjects(projectsData);
+        setUsers(usersData);
+        setOnlineUserIds(onlineData);
+        setCurrentUser(usersData[0]);
+      } catch (err) {
+        console.warn("Backend fetch failed, using mock data for demo:", err);
+        
+        // Mock Users
+        const mockUsers: User[] = [
+          {
+            id: 1,
+            name: "Alex Chen",
+            email: "alex@campus.edu",
+            bio: "Full-stack dev & UI enthusiast. Building the future of campus tech.",
+            avatar: "https://picsum.photos/seed/alex/200/200",
+            skills: ["React", "Node.js", "UI Design"],
+            availability: "Open to Startup"
+          },
+          {
+            id: 2,
+            name: "Sarah Miller",
+            email: "sarah@campus.edu",
+            bio: "Marketing major with a passion for sustainable startups.",
+            avatar: "https://picsum.photos/seed/sarah/200/200",
+            skills: ["Marketing", "Growth", "Content"],
+            availability: "Open to Work"
+          }
+        ];
+
+        // Mock Projects
+        const mockProjects: Project[] = [
+          {
+            id: 1,
+            title: "EcoTrack App",
+            description: "Building a smart campus recycling tracker to reward students for sustainable habits.",
+            category: "Startup",
+            owner_id: 1,
+            owner_name: "Alex Chen",
+            owner_avatar: "https://picsum.photos/seed/alex/200/200",
+            tags: ["Sustainability", "Mobile", "IoT"],
+            created_at: new Date().toISOString()
+          },
+          {
+            id: 2,
+            title: "Logo Design for Robotics Club",
+            description: "Need a fresh, modern logo for the university robotics competition team.",
+            category: "Freelance",
+            owner_id: 2,
+            owner_name: "Sarah Miller",
+            owner_avatar: "https://picsum.photos/seed/sarah/200/200",
+            tags: ["Graphic Design", "Branding"],
+            created_at: new Date().toISOString()
+          }
+        ];
+
+        setProjects(mockProjects);
+        setUsers(mockUsers);
+        setOnlineUserIds([1]);
+        setCurrentUser(mockUsers[0]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInitialData();
+
+    const newSocket = io({
+      reconnectionAttempts: 3,
+      timeout: 5000,
+    });
     setSocket(newSocket);
     newSocket.on('presence_update', (ids: number[]) => {
       setOnlineUserIds(ids);
