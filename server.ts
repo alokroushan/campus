@@ -126,6 +126,15 @@ async function startServer() {
     
     res.json({ success: true });
   });
+
+  app.post("/api/projects", (req, res) => {
+    const { title, description, category, owner_id, tags } = req.body;
+    const result = db.prepare(
+      "INSERT INTO projects (title, description, category, owner_id, tags) VALUES (?, ?, ?, ?, ?)"
+    ).run(title, description, category, owner_id, JSON.stringify(tags));
+    res.json({ id: result.lastInsertRowid });
+  });
+
   app.get("/api/projects", (req, res) => {
     const projects = db.prepare(`
       SELECT p.*, u.name as owner_name, u.avatar as owner_avatar 
