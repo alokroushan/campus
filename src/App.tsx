@@ -21,6 +21,7 @@ export default function App() {
   const [onlineUserIds, setOnlineUserIds] = useState<number[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   
@@ -30,14 +31,31 @@ export default function App() {
   useEffect(() => {
     // Initial Data Fetch
     Promise.all([
-      fetch('/api/projects').then(res => res.json()),
-      fetch('/api/users').then(res => res.json()),
-      fetch('/api/online-users').then(res => res.json())
-    ]).then(([projectsData, usersData, onlineData]) => {
+      fetch('/api/projects').then(res => {
+        if (!res.ok) throw new Error("Failed to fetch projects");
+        return res.json();
+      }),
+      fetch('/api/users').then(res => {
+        if (!res.ok) throw new Error("Failed to fetch users");
+        return res.json();
+      }),
+      fetch('/api/online-users').then(res => {
+        if (!res.ok) throw new Error("Failed to fetch online users");
+        return res.json();
+      }),
+      fetch('/api/auth/user').then(res => {
+        if (!res.ok) throw new Error("Failed to fetch auth user");
+        return res.json();
+      })
+    ]).then(([projectsData, usersData, onlineData, authUser]) => {
       setProjects(projectsData);
       setUsers(usersData);
       setOnlineUserIds(onlineData);
-      setCurrentUser(usersData[0]);
+      setCurrentUser(authUser);
+      setLoading(false);
+    }).catch(err => {
+      console.error("Failed to fetch data:", err);
+      setError("The backend is not responding. If you are hosting on Vercel, ensure your API routes are correctly configured and you are using a remote database instead of SQLite.");
       setLoading(false);
     });
 
@@ -101,10 +119,39 @@ export default function App() {
     setIsAiLoading(false);
   };
 
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      setCurrentUser(null);
+    } catch (err) { console.error(err); }
+  };
+
+  const handleLoginSuccess = async () => {
+    try {
+      const res = await fetch('/api/auth/user');
+      const user = await res.json();
+      setCurrentUser(user);
+    } catch (err) { console.error(err); }
+  };
+
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-[#F0F0F0] font-sans text-black selection:bg-yellow-300">
-        <Navbar currentUser={currentUser} onEditProfile={() => setIsProfileModalOpen(true)} />
+        <Navbar 
+          currentUser={currentUser} 
+          onEditProfile={() => setIsProfileModalOpen(true)} 
+          onLogout={handleLogout}
+          onLoginSuccess={handleLoginSuccess}
+        />
+
+        {error && (
+          <div className="max-w-7xl mx-auto px-4 mt-8">
+            <div className="bg-red-50 border-2 border-red-500 p-6 text-red-700 font-bold">
+              <h2 className="text-xl font-black uppercase mb-2">Connection Error</h2>
+              <p className="text-sm">{error}</p>
+            </div>
+          </div>
+        )}
         
         <AnimatePresence>
           {isProfileModalOpen && currentUser && (

@@ -6,6 +6,9 @@ import { fileURLToPath } from "url";
 import { Server } from "socket.io";
 import { createServer } from "http";
 import { GoogleGenAI } from "@google/genai";
+import session from "express-session";
+import passport from "passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,9 +27,23 @@ db.exec(`
     skills TEXT, -- JSON array
     portfolio_url TEXT,
     availability TEXT DEFAULT 'Open to Work', -- 'Open to Work', 'Open to Startup', 'Busy'
+    google_id TEXT UNIQUE,
     last_seen DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+`);
 
+// Migration: Add google_id if it doesn't exist
+try {
+  db.prepare("SELECT google_id FROM users LIMIT 1").get();
+} catch (e) {
+  try {
+    db.prepare("ALTER TABLE users ADD COLUMN google_id TEXT UNIQUE").run();
+  } catch (err) {
+    console.log("Migration: google_id column already exists or failed to add.");
+  }
+}
+
+db.exec(`
   CREATE TABLE IF NOT EXISTS projects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
@@ -37,7 +54,9 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (owner_id) REFERENCES users(id)
   );
+`);
 
+db.exec(`
   CREATE TABLE IF NOT EXISTS collaborations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     project_id INTEGER,
@@ -56,6 +75,99 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+
+  // Session configuration for iframe context
+  app.use(session({
+    secret: process.env.SESSION_SECRET || "campus-catalyst-secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: true,
+      sameSite: 'none',
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+  }));
+
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID || "dummy",
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET || "dummy",
+    callbackURL: `${process.env.APP_URL}/api/auth/google/callback`,
+    proxy: true
+  }, (accessToken, refreshToken, profile, done) => {
+    const email = profile.emails?.[0].value;
+    const name = profile.displayName;
+    const avatar = profile.photos?.[0].value;
+    const googleId = profile.id;
+
+    let user = db.prepare("SELECT * FROM users WHERE google_id = ?").get(googleId) as any;
+    
+    if (!user) {
+      const result = db.prepare(
+        "INSERT INTO users (name, email, avatar, google_id, skills) VALUES (?, ?, ?, ?, ?)"
+      ).run(name, email, avatar, googleId, JSON.stringify([]));
+      user = db.prepare("SELECT * FROM users WHERE id = ?").get(result.lastInsertRowid);
+    }
+    
+    return done(null, user);
+  }));
+
+  passport.serializeUser((user: any, done) => {
+    done(null, user.id);
+  });
+
+  passport.deserializeUser((id: number, done) => {
+    const user = db.prepare("SELECT * FROM users WHERE id = ?").get(id);
+    done(null, user);
+  });
+
+  // Auth Routes
+  app.get("/api/auth/google", (req, res, next) => {
+    const redirectUri = `${process.env.APP_URL}/api/auth/google/callback`;
+    const params = new URLSearchParams({
+      client_id: process.env.GOOGLE_CLIENT_ID!,
+      redirect_uri: redirectUri,
+      response_type: 'code',
+      scope: 'profile email',
+      prompt: 'select_account'
+    });
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
+    res.json({ url: authUrl });
+  });
+
+  app.get("/api/auth/google/callback", 
+    passport.authenticate("google", { failureRedirect: "/login" }),
+    (req, res) => {
+      res.send(`
+        <html>
+          <body>
+            <script>
+              if (window.opener) {
+                window.opener.postMessage({ type: 'OAUTH_AUTH_SUCCESS' }, '*');
+                window.close();
+              } else {
+                window.location.href = '/';
+              }
+            </script>
+            <p>Authentication successful. This window should close automatically.</p>
+          </body>
+        </html>
+      `);
+    }
+  );
+
+  app.get("/api/auth/user", (req, res) => {
+    res.json(req.user || null);
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.logout(() => {
+      res.json({ success: true });
+    });
+  });
 
   // Presence Tracking
   const onlineUsers = new Set<number>();
