@@ -30,8 +30,6 @@ export const Sidebar = ({ users, onlineUserIds }: { users: User[], onlineUserIds
       </div>
     </div>
 
-    <RevenueCalculator />
-
     <div className="border-2 border-black p-6 bg-white">
       <div className="flex items-center justify-between mb-4">
         <h4 className="font-black uppercase text-sm">Active Talent</h4>
@@ -49,5 +47,7 @@ export const Sidebar = ({ users, onlineUserIds }: { users: User[], onlineUserIds
         View All Talent
       </button>
     </div>
+
+    <RevenueCalculator />
   </div>
 );
